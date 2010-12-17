@@ -1,0 +1,90 @@
+#!/usr/bin/env python
+import datetime
+import email
+import email.errors
+import email.mime.multipart
+import locale
+import optparse
+import os
+import os.path
+import sys
+
+PROGRAM_VERSION='1.0.0'
+DEFAULT_FROM_FILE='~/.spamreport/from'
+DEFAULT_DESCRIPTION_FILE='~/.spamreport/description'
+
+locale.setlocale(locale.LC_TIME, 'C')
+
+optparser = optparse.OptionParser(usage='%prog [options] ADDRESS...',
+		                  version=('%%prog %s' % PROGRAM_VERSION))
+
+optparser.add_option('-f', '--from', dest='from_address',
+		     help='Address to put in the From: message header',
+		     metavar='ADDRESS')
+
+optparser.add_option('-d', '--description', dest='description',
+		     help='File containing the description body',
+		     metavar='FILE')
+
+# Parse program options
+(options, addresses) = optparser.parse_args()
+
+if len(addresses) == 0:
+	optparser.error('no destination addresses provided')
+
+if options.from_address is None:
+	p = os.path.expanduser(DEFAULT_FROM_FILE)
+	if not os.path.isfile(p) or not os.access(p, os.R_OK):
+		optparser.error('no "From" address provided and %s not readable' % p)
+	options.from_address = file(p, 'r').read().strip()
+
+if options.description is None:
+	p = os.path.expanduser(DEFAULT_DESCRIPTION_FILE)
+	if not os.path.isfile(p) or not os.access(p, os.R_OK):
+		optparser.error('no description file provided and %s not readable' % p)
+	options.description = p
+elif not os.path.isfile(options.description) or not os.access(options.description, os.R_OK):
+	optparser.error('description file not readable: %s' % options.description)
+
+# Read description contents
+description_contents = file(options.description, 'r').read()
+
+# Read message from stdin
+try:
+	raw_spam_message = sys.stdin.read()
+	spam_message = email.message_from_string(raw_spam_message)
+except email.errors.MessageError:
+	sys.exit('ERROR: unable to parse message from standard input')
+
+# Prepare description part
+abuse_desc = email.message.Message()
+abuse_desc.set_type('text/plain')
+abuse_desc.set_charset('us-ascii')
+abuse_desc.set_payload(description_contents)
+
+# Prepare feedback part
+abuse_feedback = email.message.Message()
+abuse_feedback.set_type('message/feedback-report')
+abuse_feedback.set_payload(
+	'Feedback-Type: abuse\n' +
+	'User-Agent: spamreport/%s\n' % PROGRAM_VERSION + 
+	'Version: 1\n')
+
+# Prepare encapsulated message
+abuse_message = email.message.Message()
+abuse_message.set_type('message/rfc822')
+abuse_message.add_header('Content-Disposition', 'inline')
+abuse_message.set_payload(raw_spam_message)
+
+# Prepare abuse report
+abuse = email.mime.multipart.MIMEMultipart()
+abuse.add_header('From', options.from_address)
+abuse.add_header('To', ', '.join(addresses))
+abuse.add_header('Date', datetime.datetime.utcnow().strftime("%a, %d %b %Y %T UTC"))
+abuse.add_header('Subject', 'Fwd: %s' % spam_message.get('Subject', ''))
+abuse.attach(abuse_desc)
+abuse.attach(abuse_feedback)
+abuse.attach(abuse_message)
+
+# Print result to stdout
+sys.stdout.write(abuse.as_string())
