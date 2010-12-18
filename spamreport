@@ -85,6 +85,8 @@ abuse.add_header('Subject', 'Fwd: %s' % spam_message.get('Subject', ''))
 abuse.attach(abuse_desc)
 abuse.attach(abuse_feedback)
 abuse.attach(abuse_message)
+abuse.set_type('multipart/report')
+abuse.set_param('report-type', 'feedback-report')
 
 # Print result to stdout
 sys.stdout.write(abuse.as_string())
