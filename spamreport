@@ -97,4 +97,4 @@ if 'MIME-Version' in abuse_message:
 	del abuse_message['MIME-Version']
 
 # Print result to stdout
-sys.stdout.write(abuse.as_string())
+print abuse.as_string()
