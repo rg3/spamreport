@@ -66,9 +66,9 @@ abuse_desc.set_payload(description_contents)
 abuse_feedback = email.message.Message()
 abuse_feedback.set_type('message/feedback-report')
 abuse_feedback.set_payload(
-	'Feedback-Type: abuse\n' +
-	'User-Agent: spamreport/%s\n' % PROGRAM_VERSION + 
-	'Version: 1\n')
+	'Feedback-Type: abuse\r\n' +
+	'User-Agent: spamreport/%s\r\n' % PROGRAM_VERSION + 
+	'Version: 1\r\n')
 
 # Prepare encapsulated message
 abuse_message = email.message.Message()
