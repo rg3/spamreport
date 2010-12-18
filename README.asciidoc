@@ -10,13 +10,17 @@ spamreport [-f ADDRESS] [-d FILE] ADDRESS
 
 == DESCRIPTION ==
 
-*spamreport* reads an email message from standard input and prints an RFC 5965 report message for it on the standard output.
+*spamreport* reads an email message from standard input and prints an RFC 5965 report message for it on standard output.
 
 == OPTIONS ==
 
--f ADDRESS:: Address to use in the From: header for the report. If this option is not provided, the address is read from the contents of the ~/.spamreport/from file.
+-f ADDRESS, --from ADDRESS:: Address to use in the From: header for the report. If this option is not provided, the address is read from the contents of the ~/.spamreport/from file.
 
--d FILE:: File containing the description message for the first part of the spam report. This file should contain an ASCII text wrapped at 80 columns or less. If this option is not provided, the description is read from the ~/.spamreport/description file.
+-d FILE, --description FILE:: File containing the description message for the first part of the spam report. This file should contain an ASCII text wrapped at 80 columns or less. If this option is not provided, the description is read from the ~/.spamreport/description file.
+
+--version:: Display the program name and version, and exit.
+
+-h, --help:: Display a summary of the program options.
 
 == REQUIREMENTS ==
 
