@@ -88,5 +88,13 @@ abuse.attach(abuse_message)
 abuse.set_type('multipart/report')
 abuse.set_param('report-type', 'feedback-report')
 
+# Delete the MIME-Version header from each MIME part
+if 'MIME-Version' in abuse_desc:
+	del abuse_desc['MIME-Version']
+if 'MIME-Version' in abuse_feedback:
+	del abuse_feedback['MIME-Version']
+if 'MIME-Version' in abuse_message:
+	del abuse_message['MIME-Version']
+
 # Print result to stdout
 sys.stdout.write(abuse.as_string())
