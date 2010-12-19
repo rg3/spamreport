@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+# Author: Ricardo Garcia
+# License: Public domain code
 import datetime
 import email
 import email.errors
